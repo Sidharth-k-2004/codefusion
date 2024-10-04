@@ -1,97 +1,87 @@
-from flask import Flask, jsonify, request
-import requests
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from flask_pymongo import PyMongo
+from bson.objectid import ObjectId
+import bcrypt
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS
 
-# Spotify API credentials
-SPOTIFY_CLIENT_ID = '4fae7b81aeba4167852828ec05725eb2'
-SPOTIFY_CLIENT_SECRET = 'de4a888c3e274901bd01bc204de7e263'
+# MongoDB configuration
+app.config["MONGO_URI"] = "mongodb://localhost:27017/yourDatabase"
+mongo = PyMongo(app)
 
-# Function to get access token
-def get_access_token():
-    url = "https://accounts.spotify.com/api/token"
-    payload = {
-        'grant_type': 'client_credentials'
-    }
-    
+# Signup route
+@app.route('/signup', methods=['POST'])
+def signup():
     try:
-        response = requests.post(url, data=payload, auth=(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET))
-        response.raise_for_status()  # Raise an error for bad responses
-        return response.json()['access_token']
-    except requests.exceptions.HTTPError as err:
-        print(f"HTTP error occurred: {err}")  # Log the error
-        print(f"Response: {response.text}")  # Log the response text for debugging
-    except Exception as e:
-        print(f"An error occurred: {e}")  # Log any other errors
-    return None
+        username = request.json['username']
+        password = request.json['password']
 
-# Route to search for sad songs by Arijit Singh
-@app.route('/search/sad-songs', methods=['GET'])
-def search_sad_songs():
-    access_token = get_access_token()
-    if access_token is None:
-        return jsonify({"error": "Could not get access token"}), 401
+        # Check if the user already exists
+        existing_user = mongo.db.users.find_one({'username': username})
+        if existing_user:
+            return jsonify({'message': 'User already exists.'}), 400
 
-    headers = {
-        'Authorization': f'Bearer {access_token}'
-    }
+        # Hash the password
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        
+        # Create a new user
+        mongo.db.users.insert_one({
+            'username': username,
+            'password': hashed_password,
+            'selectedLanguages': [],
+            'selectedArtists': []
+        })
 
-    search_query = "melody songs"
-    url = f"https://api.spotify.com/v1/search?q={search_query}&type=track&limit=10"
-
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        tracks = response.json()['tracks']['items']
-        sad_songs = []
-        for track in tracks:
-            song_info = {
-                'name': track['name'],
-                'artist': track['artists'][0]['name'],
-                'preview_url': track['preview_url'],
-                'external_url': track['external_urls']['spotify']
-            }
-            sad_songs.append(song_info)
-
-        return jsonify(sad_songs)
-    else:
-        return jsonify({"error": "Could not search for songs"}), 500
-    
-# Function to get recommendations based on mood
-@app.route('/recommendations', methods=['GET'])
-def get_recommendations():
-    access_token = get_access_token()
-    if access_token is None:
-        return jsonify({"error": "Could not get access token"}), 401
-
-    headers = {
-        'Authorization': f'Bearer {access_token}'
-    }
-
-    mood = request.args.get('mood', 'sad')  # Default to 'sad'
-    
-    # Spotify uses 'valence' (happiness), 'energy', etc. to classify mood
-    # For 'sad' songs, we'll aim for lower valence, lower energy
-    url = f"https://api.spotify.com/v1/recommendations?limit=10&seed_genres=pop&min_valence=0.1&max_valence=0.4&min_energy=0.1&max_energy=0.6"
-
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        tracks = response.json()['tracks']
-        recommendations = []
-        for track in tracks:
-            song_info = {
-                'name': track['name'],
-                'artist': track['artists'][0]['name'],
-                'preview_url': track['preview_url'],
-                'external_url': track['external_urls']['spotify']
-            }
-            recommendations.append(song_info)
-
-        return jsonify(recommendations)
-    else:
-        return jsonify({"error": "Could not get recommendations"}), 500
+        return jsonify({'message': 'Signup successful!'}), 200
+    except Exception as error:
+        print(error)
+        return jsonify({'message': 'An error occurred during signup.'}), 500
 
 
-if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+# Login route
+@app.route('/login', methods=['POST'])
+def login():
+    try:
+        username = request.json['username']
+        password = request.json['password']
+
+        # Check if user exists
+        user = mongo.db.users.find_one({'username': username})
+        if not user:
+            return jsonify({'message': 'User not found.'}), 400
+
+        # Compare passwords
+        if not bcrypt.checkpw(password.encode('utf-8'), user['password']):
+            return jsonify({'message': 'Incorrect password.'}), 400
+
+        return jsonify({'message': 'Login successful!', 'userId': str(user['_id'])}), 200
+    except Exception as error:
+        print(error)
+        return jsonify({'message': 'An error occurred during login.'}), 500
+
+
+# Store user selections route
+@app.route('/storeSelection', methods=['POST'])
+def store_selection():
+    try:
+        user_id = request.json['userId']
+        selected_languages = request.json['selectedLanguages']
+        selected_artists = request.json['selectedArtists']
+
+        # Update the user with their selected languages and artists
+        mongo.db.users.update_one(
+            {'_id': ObjectId(user_id)},  # Find the user by their ID
+            {'$set': {'selectedLanguages': selected_languages, 'selectedArtists': selected_artists}}  # Update their selections
+        )
+
+        return jsonify({'message': 'Selections saved successfully!'}), 200
+    except Exception as error:
+        print(error)
+        return jsonify({'message': 'An error occurred while saving selections.'}), 500
+
+
+# Start the server
+if __name__ == '__main__':
+    app.run(port=5000,host='0.0.0.0')
