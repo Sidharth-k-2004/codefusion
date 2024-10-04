@@ -1,110 +1,59 @@
-// import React, { useEffect, useState } from 'react';
-// import axios from 'axios';
+// import React from 'react';
 
-// const App = () => {
-//   const [songs, setSongs] = useState([]);  // State to store the songs
-//   const [errorMessage, setErrorMessage] = useState('');  // State to handle errors
-
-//   // Function to make the POST request
-//   const postData = async () => {
-//     const data = {
-//       emotion: 'sad',
-//       singer: 'Arijit Singh'
-//     };
-
-//     try {
-//       // Making the POST request
-//       const response = await axios.post('http://192.168.91.228:5000/get_songs', data, {
-//         headers: {
-//           'Content-Type': 'application/json'
-//         }
-//       });
-//       // Update the songs state with the response data
-//       setSongs(response.data.songs);
-//     } catch (error) {
-//       console.error('Error:', error);
-//       setErrorMessage('Failed to fetch songs. Please try again.');
-//     }
-//   };
-
-//   // Use useEffect to call the function when the component is mounted
-//   useEffect(() => {
-//     postData();
-//   }, []);
-
+// const SpotifyPlayer = () => {
 //   return (
-//     <div>
-//       <h1>Song Recommendation</h1>
-      
-//       {/* Display error message if any */}
-//       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      
-//       {/* Display the list of songs */}
-//       {songs.length > 0 ? (
-//         <ul>
-//           {songs.map((song, index) => (
-//             <li key={index}>
-//               <a href={song.url} target="_blank" rel="noopener noreferrer">
-//                 {song.name}
-//               </a>
-//             </li>
-//           ))}
-//         </ul>
-//       ) : (
-//         <p>Loading songs...</p>
-//       )}
+//     <div style={{ textAlign: 'center', marginTop: '20px' }}>
+//       <h2>Play Your Favorite Song</h2>
+//       <iframe
+//         style={{ borderRadius: '12px' }}
+//         src="https://open.spotify.com/embed/track/75Pos7nHiygbxinaGoEju8?utm_source=generator"
+//         width="300"
+//         height="380"
+//         frameBorder="0"
+//         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+//       ></iframe>
+//       <iframe
+//         style={{ borderRadius: '12px' }}
+//         src="https://open.spotify.com/track/3WKoi3sCS6sV01TksvrupI"
+//         width="300"
+//         height="380"
+//         frameBorder="0"
+//         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+//       ></iframe>
 //     </div>
 //   );
 // };
 
-// export default App;
+// export default SpotifyPlayer;
 
+import React from 'react';
 
-// src/App.js
-import React, { useState } from 'react';
-import SongList from './components/SongList';
-import Player from './components/Player';
+const SpotifyPlayer = () => {
+  return (
+    <div style={{ textAlign: 'center', marginTop: '20px' }}>
+      <h2>Play Your Favorite Song</h2>
 
-const songsData = [
-    { title: 'Song 1', artist: 'Artist 1', url: 'https://www.example.com/song1.mp3' },
-    { title: 'Song 2', artist: 'Artist 2', url: 'https://www.example.com/song2.mp3' },
-    { title: 'Song 3', artist: 'Artist 3', url: 'https://www.example.com/song3.mp3' },
-    // Add more songs as needed
-];
+      {/* First Song Embed */}
+      <iframe
+        style={{ borderRadius: '12px' }}
+        src="https://open.spotify.com/embed/track/75Pos7nHiygbxinaGoEju8?utm_source=generator"
+        width="300"
+        height="380"
+        frameBorder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      ></iframe>
 
-const App = () => {
-    const [currentSong, setCurrentSong] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentIndex, setCurrentIndex] = useState(-1);
-
-    const handleSelect = (song) => {
-        setCurrentSong(song);
-        setCurrentIndex(songsData.indexOf(song));
-        setIsPlaying(true);
-    };
-
-    const handlePlayPause = () => {
-        setIsPlaying(!isPlaying);
-    };
-
-    const handleNext = () => {
-        const nextIndex = (currentIndex + 1) % songsData.length;
-        setCurrentSong(songsData[nextIndex]);
-        setCurrentIndex(nextIndex);
-        setIsPlaying(true);
-    };
-
-    return (
-        <div>
-            <SongList songs={songsData} onSelect={handleSelect} />
-            <Player
-                currentSong={currentSong}
-                isPlaying={isPlaying}
-                onPlayPause={handlePlayPause}
-                onNext={handleNext}
-            />
-        </div>
-    );
+      {/* Second Song Embed */}
+      <iframe
+        style={{ borderRadius: '12px', marginTop: '20px' }}
+        src="https://open.spotify.com/embed/track/3WKoi3sCS6sV01TksvrupI?utm_source=generator"
+        width="300"
+        height="380"
+        frameBorder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      ></iframe>
+    </div>
+  );
 };
 
-export default App;
+export default SpotifyPlayer;
