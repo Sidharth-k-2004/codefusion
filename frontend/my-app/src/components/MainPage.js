@@ -1,77 +1,193 @@
-import React, { useState } from 'react';
+
+// import React, { useState,useEffect } from 'react';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import './MainPage.css'; 
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faUser } from '@fortawesome/free-solid-svg-icons';
+// import axios from 'axios'; 
+// import { useParams } from 'react-router-dom';
+
+
+// function MainPage(newSongs) {
+//     const [searchTerm, setSearchTerm] = useState('');
+//     const [songs, setSongs] = useState(newSongs || []); 
+//     const { songId } = useParams();
+//     console.log(songs);
+//     useEffect(() => {
+//         setSongs(newSongs);
+//       });
+//     const handleSearch = async () => {
+//         try {
+//             const response = await axios.post('http://192.168.91.228:5000/search', {
+//                 query: searchTerm
+//             });
+            
+//             setSongs(response.data); 
+//         } catch (error) {
+//             console.error("Error fetching songs:", error);
+//         }
+//     };
+
+//     const handleKeyPress = (event) => {
+//         if (event.key === 'Enter') {
+//             handleSearch(); 
+//         }
+//     };
+
+//     return (
+//         <div style={{
+//             backgroundImage: `url('/Images/bg_sp.jpg')`,  // Changed to template literal
+//             backgroundSize: 'cover',
+//             backgroundAttachment: 'scroll',
+//             backgroundPosition: 'center',
+//             backgroundRepeat: 'no-repeat',
+//             backgroundAttachment: 'fixed',
+//             minHeight: '100vh',
+//             width: '100%',
+//             color: 'white',
+//         }}>
+//             <div className="row" style={{ padding: '20px' }}>
+//                 <div className='col-2' style={{ marginLeft: "120px" }}>
+//                     <img
+//                         src="/Images/logo_sp.jpg"
+//                         alt="App Logo"
+//                         style={{ width: '100px', height: '100px' }}
+//                     />
+//                 </div>
+//                 <div className="col-5 text-center mt-4">
+//                     <input
+//                         type="text"
+//                         className="form-control search-input"
+//                         placeholder="Search for a song..."
+//                         value={searchTerm}
+//                         onChange={(e) => setSearchTerm(e.target.value)}
+//                         onKeyPress={handleKeyPress} 
+//                         style={{
+//                             backgroundColor: 'rgba(68, 68, 68, 0.8)',
+//                             color: 'white',
+//                             width: '400px',
+//                             margin: '0 auto',
+//                             borderRadius: '40px',
+//                             border: 'none' 
+//                         }}
+//                     />
+//                 </div>
+//                 <div className='col-3 mt-4'>
+//                     <button
+//                         style={{
+//                             backgroundColor: 'green',
+//                             borderRadius: '50%',
+//                             width: '50px',
+//                             height: '50px',
+//                             display: 'flex',
+//                             alignItems: 'center',
+//                             justifyContent: 'center',
+//                             border: 'none',
+//                             cursor: 'pointer',
+//                             boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+//                         }}
+//                     >
+//                         <FontAwesomeIcon icon={faUser} size="lg" color="white" />
+//                     </button>
+//                 </div>
+//             </div>
+//             <div className="row p-5 mx-5" style={{ flexGrow: 1, justifyContent:"space-around", display:"flex" }}>
+//                 {songs.map((song, index) => (
+//                     <div className="col-md-3 col-sm-6 mb-1" key={index} style={{ justifyContent:"space-around" }}> 
+//                         <iframe
+//                             style={{ borderRadius: '12px', width: '100%' }} 
+//                             src={`https://open.spotify.com/embed/track/${song.id}?utm_source=generator`}
+//                             height="350"
+//                             frameBorder="0"
+//                             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+//                         ></iframe>
+//                     </div>
+//                 ))}
+//             </div>
+//         </div>
+//     );
+// }
+
+// export default MainPage;
+
+
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './MainPage.css'; // Ensure you have a CSS file for styles
+import './MainPage.css'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios'; // Import axios for API calls
+import axios from 'axios'; 
+import { useParams } from 'react-router-dom';
 
-// Array of colors for the cards
-const colors = ['#FF5733', '#33FF57', '#3357FF', '#F0F033', '#FF33F6', '#33FFF0'];
-
-function MainPage() {
+function MainPage({ newSongs }) {  // Destructure newSongs from props
     const [searchTerm, setSearchTerm] = useState('');
-    const [songs, setSongs] = useState([]); // State to store fetched songs
+    const [songs, setSongs] = useState(newSongs || []); 
+    const { songId } = useParams();
 
-    // Function to handle search
+    useEffect(() => {
+        setSongs(newSongs);
+    }, [newSongs]);
+
     const handleSearch = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/search', { query: searchTerm }); // Change to POST request with query in the body
-            setSongs(response.data); // Set the fetched songs to state
+            const response = await axios.post('http://192.168.91.228:5000/search', {
+                query: searchTerm
+            });
+            
+            setSongs(response.data);  // Assuming response contains new song URLs
         } catch (error) {
             console.error("Error fetching songs:", error);
         }
     };
-    
 
-    // Function to handle 'Enter' key press
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
-            handleSearch(); // Trigger search on Enter key press
+            handleSearch(); 
         }
     };
 
-    return ( 
-        <div style={{ 
-                backgroundImage: `url('/Images/bg_sp.jpg')`,  // Replace with your image path
-                backgroundSize: 'cover',    // Ensures the whole image is displayed
-                backgroundPosition: 'center', // Centers the image
-                backgroundRepeat: 'no-repeat', // Prevents the image from repeating
-                backgroundAttachment: 'fixed', // Fixes the background while scrolling
-                height: '100vh',  // Makes sure it covers the entire viewport height
-                width: '100%',    // Makes sure it covers the entire viewport width
-                color: 'white',
-        }}>  
+    return (
+        <div style={{
+            backgroundImage: `url('/Images/bg_sp.jpg')`,  
+            backgroundSize: 'cover',
+            backgroundAttachment: 'scroll',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundAttachment: 'fixed',
+            minHeight: '100vh',
+            width: '100%',
+            color: 'white',
+        }}>
             <div className="row" style={{ padding: '20px' }}>
-                <div className='col-3'>
-                    <img 
-                        src="/Images/logo_sp.jpg" 
+                <div className='col-2' style={{ marginLeft: "120px" }}>
+                    <img
+                        src="/Images/logo_sp.jpg"
                         alt="App Logo"
-                        style={{ width: '100px', height: '100px' }} 
+                        style={{ width: '100px', height: '100px' }}
                     />
                 </div>
-                <div className="col-6 text-center mt-4">
-                    <input 
-                        type="text" 
-                        className="form-control search-input" 
-                        placeholder="Search for a song..." 
-                        value={searchTerm} 
-                        onChange={(e) => setSearchTerm(e.target.value)} 
-                        onKeyPress={handleKeyPress} // Add event listener for 'Enter' key
-                        style={{ 
-                            backgroundColor: 'rgba(68, 68, 68, 0.8)', 
-                            color: 'white', 
-                            width: '400px', 
-                            margin: '0 auto', 
-                            borderRadius: '40px', 
-                            border: 'none' // Optional: remove border
-                        }} 
+                <div className="col-5 text-center mt-4">
+                    <input
+                        type="text"
+                        className="form-control search-input"
+                        placeholder="Search for a song..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyPress={handleKeyPress} 
+                        style={{
+                            backgroundColor: 'rgba(68, 68, 68, 0.8)',
+                            color: 'white',
+                            width: '400px',
+                            margin: '0 auto',
+                            borderRadius: '40px',
+                            border: 'none' 
+                        }}
                     />
                 </div>
                 <div className='col-3 mt-4'>
-                    <button 
-                        onClick={handleSearch} // Trigger search on click
+                    <button
                         style={{
-                            backgroundColor: '#1DB954', 
+                            backgroundColor: 'green',
                             borderRadius: '50%',
                             width: '50px',
                             height: '50px',
@@ -83,64 +199,28 @@ function MainPage() {
                             boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
                         }}
                     >
-                    <FontAwesomeIcon icon={faUser} size="lg" color="white" />
+                        <FontAwesomeIcon icon={faUser} size="lg" color="white" />
                     </button>
                 </div>
             </div>
 
-            {/* Cards Section */}
-            <div className="row" style={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
-                {songs.map((song, index) => (
-                    <div 
-                        key={index} 
-                        style={{ 
-                            backgroundColor: colors[index % colors.length], // Use color from array
-                            width: '150px', 
-                            height: '150px', 
-                            margin: '10px', 
-                            borderRadius: '10px', 
-                            display: 'flex', 
-                            justifyContent: 'center', 
-                            alignItems: 'center', 
-                            color: 'white', 
-                            fontWeight: 'bold',
-                            flexDirection: 'column' // Align text in a column
-                        }}
-                    >
-                        <div>{song.name}</div>
-                        <div>{song.artist}</div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Play Button at the Bottom */}
-            <div className="row" style={{ padding: '20px', justifyContent: 'center' }}>
-                <div className="col text-center mx-5">
-                    <button 
-                        className="btn" 
-                        style={{ 
-                            backgroundColor: 'white', // White background
-                            borderRadius: '50%', 
-                            width: '80px', // Increased size
-                            height: '80px',
-                            display: 'flex',
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.2)', // Shadow for depth
-                            border: 'none', // Optional: remove border
-                        }}
-                    >
-                        <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 24 24" 
-                            width="30px" 
-                            height="30px" 
-                            fill="black" // Change icon color to black
-                        >
-                            <path d="M8 5v14l11-7z"/>
-                        </svg>
-                    </button>
-                </div>
+            <div className="row p-5 mx-5" style={{ flexGrow: 1, justifyContent:"space-around", display:"flex" }}>
+                {songs.length > 0 ? (
+                    songs.map((song, index) => (
+                        <div className="col-md-3 col-sm-6 mb-1" key={index} style={{ justifyContent:"space-around" }}> 
+                            <iframe
+                                style={{ borderRadius: '12px', width: '100%' }} 
+                                // src={`${songUrl}`}  
+                                src={`https://open.spotify.com/embed/track/${song.id}?utm_source=generator`}
+                                height="350"
+                                frameBorder="0"
+                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                            ></iframe>
+                        </div>
+                    ))
+                ) : (
+                    <p>No songs to display.</p>
+                )}
             </div>
         </div>
     );

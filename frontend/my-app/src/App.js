@@ -46,22 +46,33 @@
 // };
 
 // export default SpotifyPlayer;
-// App.js
-import React from 'react';
+// App.jsimport React, { useState, useEffect } from 'react';
+
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './components/login';
 import Signup from './components/signup';
-// import Main from './components/main';
-
+import Main from './components/main';
+import WebcamCapture from './components/webcam';
+import MainPage from './components/MainPage';
+import { useEffect,useState } from 'react';
 
 function App() {
+  const [songs, setSongs] = useState([]);
+
+  // Log the value of songs whenever it changes
+  useEffect(() => {
+    console.log('Songs updated:', songs);
+  }, [songs]);
+
   return (
     <Router>
       <div className="App">
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          {/* <Route path= "/main" element ={<Main />}/> */}
+          <Route path="/main" element={<Main />} />
+          <Route path="/webcam" element={<WebcamCapture setSongs={setSongs} />} /> {/* Pass setSongs correctly */}
+          <Route path="/emotune" element={<MainPage newSongs={songs} />} /> 
         </Routes>
       </div>
     </Router>
@@ -69,3 +80,8 @@ function App() {
 }
 
 export default App;
+
+
+
+
+  

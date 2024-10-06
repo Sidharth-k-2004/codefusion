@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
 import './login.css';
-//import videoSrc from './spotify_bgv.mp4'; // Adjust the path if needed
-//import BackgroundVideo from './BGV';
+import videoSrc from './spotify_bgv.mp4'; // Adjust the path if needed
+import BackgroundVideo from './BGV';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -23,23 +23,21 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://10.7.19.112:5000/login', { username, password });
+      const response = await axios.post('http://192.168.91.228:5000/login', { username, password });
       alert(response.data.message);
 
       // Assuming your response contains the userId
-      const { userId } = response.data; // Extract userId from response
+      const userId = response.data.userId; // Extract userId from response
 
-      // Redirect to the main page after a successful login, passing userId
-      navigate('/main', { state: { userId } }); // Pass userId to the main page
+      // Redirect to the main page after a successful login
+      navigate('/webcam', { state: { userId } }); // Pass userId to the main page
     } catch (error) {
-      alert(error.response?.data?.message || 'An error occurred. Please try again.'); // Handle error gracefully
+      alert(error.response?.data?.error || 'An error occurred. Please try again.'); // Handle error gracefully
     }
   };
 
   return (
-    // <BackgroundVideo videoSrc={videoSrc}>
-    <div>
-
+    <BackgroundVideo videoSrc={videoSrc}>
       <div className="login-container" style={{ opacity: showLogin ? 1 : 0, transition: 'opacity 1s ease-in-out' }}>
         <h2>Login</h2>
         <input
@@ -57,8 +55,7 @@ const Login = () => {
         <button onClick={handleLogin}>Login</button>
         <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
       </div>
-    </div>
-    // </BackgroundVideo>
+    </BackgroundVideo>
   );
 };
 

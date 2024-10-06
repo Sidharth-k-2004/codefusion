@@ -1,15 +1,17 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-from flask_pymongo import PyMongo
-from bson.objectid import ObjectId
+from pymongo import MongoClient
+from bson.objectid import ObjectId  # Import ObjectId for MongoDB
 import bcrypt
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS
+CORS(app)  # Enable CORS for all routes
 
-# MongoDB configuration
-app.config["MONGO_URI"] = "mongodb://localhost:27017/yourDatabase"
-mongo = PyMongo(app)
+# Connect to MongoDB
+client = MongoClient('mongodb+srv://sidharthkdinesan123:MuiiFKdawTLot40o@kcet-resukts.t7dnjbg.mongodb.net/?retryWrites=true&w=majority&appName=kcet-resukts')
+db = client['kcet_database']  
+users_collection = db['users']  
+username=0
 
 # Signup route
 @app.route('/signup', methods=['POST'])
@@ -18,70 +20,77 @@ def signup():
         username = request.json['username']
         password = request.json['password']
 
-        # Check if the user already exists
-        existing_user = mongo.db.users.find_one({'username': username})
-        if existing_user:
-            return jsonify({'message': 'User already exists.'}), 400
+        print(f"Attempting to register user: {username}")
 
-        # Hash the password
+        if users_collection.find_one({'username': username}):
+            print(f"Username '{username}' already exists.")
+            return jsonify({'error': 'Username already exists'}), 400
+
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         
-        # Create a new user
-        mongo.db.users.insert_one({
+        new_user = {
             'username': username,
-            'password': hashed_password,
-            'selectedLanguages': [],
-            'selectedArtists': []
-        })
+            'password': hashed_password
+        }
+        
+        users_collection.insert_one(new_user)
+        print(f"User '{username}' registered successfully.")
 
-        return jsonify({'message': 'Signup successful!'}), 200
-    except Exception as error:
-        print(error)
-        return jsonify({'message': 'An error occurred during signup.'}), 500
+        return jsonify({'message': 'User registered successfully'}), 201
 
+    except Exception as e:
+        print("Error occurred during signup:", e)  # Log the full error
+        return jsonify({'error': 'An error occurred during signup.'}), 500
 
 # Login route
 @app.route('/login', methods=['POST'])
 def login():
-    try:
-        username = request.json['username']
-        password = request.json['password']
+    username = request.json['username']
+    password = request.json['password']
 
-        # Check if user exists
-        user = mongo.db.users.find_one({'username': username})
-        if not user:
-            return jsonify({'message': 'User not found.'}), 400
+    user = users_collection.find_one({'username': username})
 
-        # Compare passwords
-        if not bcrypt.checkpw(password.encode('utf-8'), user['password']):
-            return jsonify({'message': 'Incorrect password.'}), 400
+    if user:
+        if bcrypt.checkpw(password.encode('utf-8'), user['password']):
+            return jsonify({'message': 'Login successful'}), 200
+        else:
+            return jsonify({'error': 'Invalid credentials'}), 401
+    else:
+        return jsonify({'error': 'User not found'}), 404
 
-        return jsonify({'message': 'Login successful!', 'userId': str(user['_id'])}), 200
-    except Exception as error:
-        print(error)
-        return jsonify({'message': 'An error occurred during login.'}), 500
-
-
-# Store user selections route
+# Store selections route
 @app.route('/storeSelection', methods=['POST'])
 def store_selection():
     try:
-        user_id = request.json['userId']
-        selected_languages = request.json['selectedLanguages']
-        selected_artists = request.json['selectedArtists']
+        data = request.json
+        # user_id = data['userId']
+        user_id=username
+        selected_languages = data['selectedLanguages']
+        selected_artists = data['selectedArtists']
+
+        # Convert user_id to ObjectId if necessary
+        if not ObjectId.is_valid(user_id):
+            return jsonify({'error': 'Invalid user ID format'}), 400
+        user_id = ObjectId(user_id)
 
         # Update the user with their selected languages and artists
-        mongo.db.users.update_one(
-            {'_id': ObjectId(user_id)},  # Find the user by their ID
-            {'$set': {'selectedLanguages': selected_languages, 'selectedArtists': selected_artists}}  # Update their selections
+        result = users_collection.update_one(
+            {'_id': user_id},  # Find the user by their ID
+            {'$set': {
+                'selectedLanguages': selected_languages,
+                'selectedArtists': selected_artists
+            }}
         )
 
-        return jsonify({'message': 'Selections saved successfully!'}), 200
+        if result.modified_count > 0:
+            return jsonify({'message': 'Selections saved successfully!'}), 200
+        else:
+            return jsonify({'message': 'No changes made or user not found.'}), 404
+
     except Exception as error:
-        print(error)
-        return jsonify({'message': 'An error occurred while saving selections.'}), 500
+        print("Error occurred:", error)  # Log the full error
+        return jsonify({'message': 'An error occurred while saving selections.', 'error': str(error)}), 500
 
 
-# Start the server
 if __name__ == '__main__':
-    app.run(port=5000,host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')

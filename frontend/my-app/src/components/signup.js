@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import './signup.css';
-// import videoSrc from './spotify_bgv.mp4'; // Adjust path if needed
-// import BackgroundVideo from './BGV';
+import videoSrc from './spotify_bgv.mp4'; // Adjust path if needed
+import BackgroundVideo from './BGV';
 
 const Signup = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showSignup, setShowSignup] = useState(false); // Control visibility
-  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,10 +19,15 @@ const Signup = () => {
 
   const handleSignup = async () => {
     try {
-      const response = await axios.post('http://10.7.19.112:5000/signup', { username, password });
+      const response = await axios.post('http://192.168.91.228:5000/signup', { username, password });
       alert(response.data.message);
-      navigate('/');
-
+  
+      // Extract userId from response
+      const { userId } = response.data;
+  
+      // Redirect to the main page, passing userId
+      navigate('/main', { state: { userId } });
+  
     } catch (error) {
       const errorMessage = error.response?.data?.message || "An error occurred during signup.";
       alert(errorMessage);
@@ -31,8 +35,7 @@ const Signup = () => {
   };
 
   return (
-    // <BackgroundVideo videoSrc={videoSrc}>
-    <div>
+    <BackgroundVideo videoSrc={videoSrc}>
       <div className="signup-container" style={{ opacity: showSignup ? 1 : 0, transition: 'opacity 1s ease-in-out' }}>
         <h2>Sign Up</h2>
         <input
@@ -50,8 +53,7 @@ const Signup = () => {
         <button onClick={handleSignup}>Sign Up</button>
         <p>Already have an account? <Link to="/">Login</Link></p>
       </div>
-      </div>
-    // </BackgroundVideo>
+    </BackgroundVideo>
   );
 };
 
