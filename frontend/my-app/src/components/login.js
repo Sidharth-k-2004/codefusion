@@ -23,7 +23,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://192.168.91.228:5000/login', { username, password });
+      const response = await axios.post('http://192.168.1.7:5000/login', { username, password });
       alert(response.data.message);
 
       // Assuming your response contains the userId

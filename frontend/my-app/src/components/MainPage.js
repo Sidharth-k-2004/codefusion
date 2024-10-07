@@ -130,7 +130,7 @@ function MainPage({ newSongs }) {  // Destructure newSongs from props
 
     const handleSearch = async () => {
         try {
-            const response = await axios.post('http://192.168.91.228:5000/search', {
+            const response = await axios.post('http://192.168.1.7:5000/search', {
                 query: searchTerm
             });
             

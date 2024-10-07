@@ -19,7 +19,7 @@ const Signup = () => {
 
   const handleSignup = async () => {
     try {
-      const response = await axios.post('http://192.168.91.228:5000/signup', { username, password });
+      const response = await axios.post('http://192.168.1.7:5000/signup', { username, password });
       alert(response.data.message);
   
       // Extract userId from response

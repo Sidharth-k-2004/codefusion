@@ -195,7 +195,7 @@ const WebcamCapture = ({ setSongs }) => {
     const base64Image = imageDataURL.split(',')[1]; // Extract base64 image part
     try {
       // Send the image data to the backend
-      const response = await axios.post('http://192.168.91.228:5000/imageprocessing', {
+      const response = await axios.post('http://192.168.1.7:5000/imageprocessing', {
         image: base64Image,
       });
   

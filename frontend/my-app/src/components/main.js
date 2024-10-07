@@ -132,7 +132,7 @@ const Main = () => {
     ).filter(Boolean);
 
     try {
-      const response = await axios.post('http://192.168.91.228:5000/storeSelection', {
+      const response = await axios.post('http://192.168.1.7:5000/storeSelection', {
         userId, // Pass userId to the backend
         selectedLanguages,
         selectedArtists: selectedArtistNames,
